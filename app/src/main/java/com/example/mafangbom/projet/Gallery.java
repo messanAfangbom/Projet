@@ -1,5 +1,5 @@
 package com.example.mafangbom.projet;
-//ggjh
+
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
