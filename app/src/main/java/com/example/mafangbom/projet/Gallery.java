@@ -1,5 +1,5 @@
 package com.example.mafangbom.projet;
-
+//ggjh
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -23,7 +23,6 @@ import java.io.IOException;
  */
 
 public class Gallery extends Activity {
-
 
     public ImageView imageView;
     public Uri imageBitmap;
