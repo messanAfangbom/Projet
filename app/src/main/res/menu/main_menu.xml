@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <item
+        android:id="@+id/action_reset"
+        android:title="Reset"
+        android:icon="@android:drawable/ic_menu_delete"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/camera"
+        android:title="Camera"
+        android:icon="@android:drawable/ic_menu_camera"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/save"
+        android:title="Save"
+        android:icon="@android:drawable/ic_menu_save"
+        app:showAsAction="always"/>
+
+
+    <item
+        android:id="@+id/traitement"
+        android:title="Traitement d'image">
+        <menu>
+            <item
+                android:id="@+id/griser"
+                android:title="Griser"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/contrasteCouleur"
+                android:title="Contraste"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/extensiongris"
+                android:title="ExtensionNiveauGris"
+                app:showAsAction="never"/>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/gallery"
+        android:title="Gallery"
+        android:icon="@android:drawable/ic_menu_gallery"
+        app:showAsAction="always"  />
+    <item
+        android:id="@+id/luminosite"
+        android:title="Luminosite"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/saturation"
+        android:title="Saturation"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/Teinte"
+        android:title="Mettre une teinte">
+        <menu>
+
+            <item
+                android:id="@+id/teinte"
+                android:title="Rotation_HSV"/>
+            <item
+                android:id="@+id/TeinteR"
+                android:title="Rouge_gris"/>
+            <item
+                android:id="@+id/TeinteJ"
+                android:title="Jaune_gris"/>
+            <item
+                android:id="@+id/TeinteV"
+                android:title="Vert_gris"/>
+            <item
+                android:id="@+id/TeinteB"
+                android:title="Bleu_gris"/>
+            <item
+                android:id="@+id/TeinteM"
+                android:title="Magenta_gris"/>
+
+        </menu>
+    </item>
+    <item
+        android:id="@+id/Filtre"
+        android:title="Mettre un filtre">
+        <menu>
+            <item
+                android:id="@+id/moyenne"
+                android:title="Moyenne"/>
+            <item
+                android:id="@+id/gaussien"
+                android:title="Gaussien"/>
+            <item
+                android:id="@+id/sobel"
+                android:title="Sobel"/>
+            <item
+                android:id="@+id/prewitt"
+                android:title="Prewiit"/>
+            <item
+                android:id="@+id/laplacien"
+                android:title="Laplacien"/>
+
+        </menu>
+
+    </item>
+
+
+
+</menu>
