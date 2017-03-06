@@ -2,22 +2,21 @@ package com.example.mafangbom.projet;
 
 
 import android.app.Activity;
+import android.app.WallpaperManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,10 +30,10 @@ import static android.graphics.Color.rgb;
 
 public class MainActivity extends AppCompatActivity {
     SeekBar sb;
-    int progress = 50;
+    int progress ;
     private Toolbar toolbar;
-    public   ImageView imageToUpload;
-    public Bitmap reset;
+    public ImageView imageToUpload;
+    public  Bitmap reset;
     public  Bitmap currentBitmap;
     private static final int PICK_IMAGE = 100;
     Uri selectedImage;
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     static int [][] SOBEL2 = {{-1,-2,-1},{0 ,0, 0},{1,2,1}};
     static int [][] PREWITT1 = {{-1,0,1},{-1,0,1},{-1,0,1}};
     static int [][] PREWITT2 = {{-1,-1,-1},{0,0,0},{1,1,1}};
-    static int[][] gaussien = {{1, 2, 3, 2, 1}, {2,6,8,6,2},{3,8,10,8,3},{2,6,8,6,2},{1,2,3,2,1}};
+    static int [][] gaussien = {{1, 2, 3, 2, 1}, {2,6,8,6,2},{3,8,10,8,3},{2,6,8,6,2},{1,2,3,2,1}};
     static int [][] MOYENNE = {{3,3,3},{3,3,3},{3,3,3}};
 
     @Override
@@ -56,61 +55,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         imageToUpload = (ImageView) findViewById(R.id.imageToUpload);
 
-        Button myButton = ( Button) findViewById(R.id.button);
-        myButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity.this, Next_Activity.class);
-                startActivity(myIntent);
-            }
-        });
         sb = (SeekBar) findViewById(R.id.seekbar_luminosite);
-
-
-
-    }
-
-    public static Bitmap viewToBitmap(View view){
-        int width = view.getWidth();
-        int height = view.getHeight();
-        Bitmap bitmap = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
-        Bitmap copie = bitmap.copy(bitmap.getConfig(),true);
-        Canvas canvas = new Canvas(copie);
-        view.draw(canvas);
-        return copie;
+        sb.setVisibility(View.INVISIBLE);
 
     }
-
-public void luminosite (final Bitmap b){
-
-    progress = 50;
-    sb.setProgress(progress);
-    sb.setMax(99);
-    sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int i, boolean fromUser) {
-            if (i < 50) {
-                i = i - 50;
-                Bitmap r = b.copy(Bitmap.Config.ARGB_8888, true);
-                imageToUpload.setImageBitmap(lumsat((i), r, "luminosite"));
-            } else if (i > 50){
-                i = i % 50;
-                Bitmap r = b.copy(Bitmap.Config.ARGB_8888, true);
-                imageToUpload.setImageBitmap(lumsat((i), r, "luminosite"));
-            }
-        }
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-
-        }
-    });
-}
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -128,7 +76,7 @@ public void luminosite (final Bitmap b){
                 imageToUpload.setImageBitmap(Contraste(currentBitmap));
                 break;
             case R.id.extensiongris:
-                imageToUpload.setImageBitmap(extDgris(currentBitmap));
+                imageToUpload.setImageBitmap(extensionDynamiqueGris(currentBitmap));
                 break;
             case R.id.TeinteB:
                 imageToUpload.setImageBitmap(garderTeinte("bleu",currentBitmap));
@@ -149,43 +97,41 @@ public void luminosite (final Bitmap b){
                 openGallery();
                 break;
             case R.id.luminosite:
-
-
-
-
-
-
-                Intent luminosite = new Intent(MainActivity.this, Luminosite.class);
-                luminosite.putExtra("Bitmap",currentBitmap);
-                startActivity(luminosite);
+                luminosite(currentBitmap);
                 break;
             case  R.id.laplacien:
-                imageToUpload.setImageBitmap(convolute2(currentBitmap,LAPLACIEN8,"laplacien"));
+                imageToUpload.setImageBitmap(convolution(currentBitmap,LAPLACIEN8,"laplacien"));
                 break;
             case R.id.sobel:
-                imageToUpload.setImageBitmap(SobelPrewitt(currentBitmap,SOBEL1,SOBEL2));
+                imageToUpload.setImageBitmap(sobelPrewitt(currentBitmap,SOBEL1,SOBEL2));
                 break;
             case R.id.prewitt:
-                imageToUpload.setImageBitmap(SobelPrewitt(currentBitmap,PREWITT1,PREWITT2));
+                imageToUpload.setImageBitmap(sobelPrewitt(currentBitmap,PREWITT1,PREWITT2));
                 break;
             case R.id.moyenne:
-                imageToUpload.setImageBitmap(convolute2(currentBitmap,MOYENNE,"moyenne"));
+                imageToUpload.setImageBitmap(convolution(currentBitmap,MOYENNE,"moyenne"));
                 break;
             case R.id.gaussien:
-                imageToUpload.setImageBitmap(convolute2(currentBitmap,gaussien,"gauss"));
+                imageToUpload.setImageBitmap(convolution(currentBitmap,gaussien,"gauss"));
                 break;
             case R.id.action_reset:
                 imageToUpload.setImageBitmap(currentBitmap);
+                sb.setVisibility(View.INVISIBLE);
                 break;
             case R.id.camera:
                 openCamera();
                 break;
             case R.id.saturation:
-                Intent saturation = new Intent(MainActivity.this, Luminosite.class);
-                saturation.putExtra("Bitmap",currentBitmap);
-                startActivity(saturation);
+                saturation(currentBitmap);
                 break;
-
+            case R.id.teinte360:
+                teinte360(currentBitmap);
+                break;
+            case R.id.negatif:
+                imageToUpload.setImageBitmap(negatif(currentBitmap));
+                break;
+            case R.id.wallpaper:
+                startWall(currentBitmap);
 
         }
         return super.onOptionsItemSelected(item);
@@ -202,22 +148,6 @@ public void luminosite (final Bitmap b){
         Intent camera = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(camera, 0);
     }
-
-/*
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
-            Uri imageUri = data.getData();
-            imageToUpload.setImageURI(imageUri);
-        }
-        if (resultCode == RESULT_OK && requestCode == 0) {
-            Bitmap bit = (Bitmap) data.getExtras().get("data");
-            currentBitmap = bit.copy(bit.getConfig(),true);
-            imageToUpload.setImageBitmap(currentBitmap);
-        }
-
-    }  */
 
 
     @Override
@@ -257,23 +187,6 @@ public void luminosite (final Bitmap b){
 
             }
 
-
-    public Bitmap getResizedBitmap(Bitmap image, int maxSize) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-
-        float bitmapRatio = (float)width / (float) height;
-        if (bitmapRatio > 1) {
-            width = maxSize;
-            height = (int) (width / bitmapRatio);
-        } else {
-            height = maxSize;
-            width = (int) (height * bitmapRatio);
-        }
-        return Bitmap.createScaledBitmap(image, width, height, true);
-    }
-
-
     public Bitmap toGrayTableau(Bitmap bMap) {
         int[] Pixels = new int[bMap.getWidth() * bMap.getHeight()];
         Bitmap copie = bMap.copy(bMap.getConfig(),true);
@@ -294,8 +207,9 @@ public void luminosite (final Bitmap b){
 
         int [] tableau = new int [bMap.getWidth()*bMap.getHeight()];
         bMap.getPixels(tableau,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
-        Bitmap copie = bMap.copy(bMap.getConfig(),true);
-        toGrayTableau(copie);
+
+        Bitmap copie = bMap.copy(bMap.getConfig(),true); // je fais une copie de ma bitmap
+        toGrayTableau(copie); // je grise la copie afin de prendre le max et le min de l'image grisée
         int [] Pixels = new int [bMap.getWidth() * bMap.getHeight()];
         int min = 255;
         int max = 0;
@@ -331,7 +245,7 @@ public void luminosite (final Bitmap b){
         return copie;
     }
 
-    public Bitmap extDgris(Bitmap bMap){
+    public Bitmap extensionDynamiqueGris(Bitmap bMap){
 
         Bitmap copie = bMap.copy(bMap.getConfig(),true);
         toGrayTableau(copie);
@@ -341,7 +255,7 @@ public void luminosite (final Bitmap b){
 
         copie.getPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
 
-        for ( int ng = 0; ng < Pixels.length;ng++) { // Ceci est un debut de l'extension dynamique mais que j'ai pas termininé. toute la fonction extDgris marche
+        for ( int ng = 0; ng < Pixels.length;ng++) { // Ceci est un debut de l'extension dynamique mais que j'ai pas termininé. toute la fonction extensionDynamiqueGris marche
             if (red(Pixels[ng]) < min) {
                 min = red(Pixels[ng]);
             }
@@ -362,7 +276,92 @@ public void luminosite (final Bitmap b){
         return copie;
     }
 
-    public Bitmap garderTeinte(String monchoix, Bitmap bMap) { // pour garder uniquement le rouge d'une image et extDgris le reste
+
+
+    public void luminosite (final Bitmap b){
+        sb.setVisibility(View.VISIBLE);
+        progress = 50;
+        sb.setProgress(progress);
+        sb.setMax(99);
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean fromUser) {
+                if (i < 50) {
+                    i = i - 50;
+                    Bitmap r = b.copy(Bitmap.Config.ARGB_8888, true);
+                    imageToUpload.setImageBitmap(luminositeEtSaturation((i), r, "luminosite"));
+                } else if (i > 50){
+                    i = i % 50;
+                    Bitmap r = b.copy(Bitmap.Config.ARGB_8888, true);
+                    imageToUpload.setImageBitmap(luminositeEtSaturation((i), r, "luminosite"));
+                }
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+    }
+
+    public void saturation (final Bitmap b){
+        sb.setVisibility(View.VISIBLE);
+        progress = 50;
+        sb.setProgress(progress);
+        sb.setMax(99);
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean fromUser) {
+                if (i < 50) {
+                    i = i - 50;
+                    Bitmap r = b.copy(Bitmap.Config.ARGB_8888, true);
+                    imageToUpload.setImageBitmap(luminositeEtSaturation((i), r, "saturation"));
+                } else if (i > 50){
+                    i = i % 50;
+                    Bitmap r = b.copy(Bitmap.Config.ARGB_8888, true);
+                    imageToUpload.setImageBitmap(luminositeEtSaturation((i), r, "saturation"));
+                }
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+    }
+
+    public void teinte360 (final Bitmap b){
+        sb.setVisibility(View.VISIBLE);
+        progress = 0;
+        sb.setProgress(progress);
+        sb.setMax(360);
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean fromUser) {
+                Bitmap r = b.copy(Bitmap.Config.ARGB_8888, true);
+                imageToUpload.setImageBitmap(teinte(i,b));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+    }
+
+    public Bitmap garderTeinte(String monchoix, Bitmap bMap) { // pour garder uniquement le rouge d'une image et extensionDynamiqueGris le reste
         int height = bMap.getHeight();
         int width = bMap.getWidth();
         int[] pixelTab = new int[height * width]; // à l'aide d'un tableau
@@ -422,8 +421,31 @@ public void luminosite (final Bitmap b){
     }
 
 
+    public Bitmap teinte(int teinte, Bitmap b) { //fait varier les teintes par la variable teinte qui represente l'angle associé a une couleur
+        int [] Pixels = new int [b.getWidth() * b.getHeight()];
+        b.getPixels(Pixels,0,b.getWidth(),0,0,b.getWidth(),b.getHeight()); // je recupere tous les pixels dans un tableau
+        for (int i =0; i < Pixels.length;++i){
+            int rd = Color.red(Pixels[i]);
+            int vt = Color.green(Pixels[i]);
+            int bl = Color.blue(Pixels[i]);
+            int alpha = Color.alpha(Pixels[i]);
+            float [] hsv = new float[3];
+            Color.RGBToHSV(rd,vt,bl,hsv);
+            if (teinte == 0){
+                hsv[0] = hsv[0];
+            }
+            else {
+                hsv[0] = teinte;
+            }
+            Pixels[i] = Color.HSVToColor(alpha,hsv);
 
-    public Bitmap convolute2 (Bitmap b, int [][] filtre, String monchoix) {
+        }
+        b.setPixels(Pixels,0,b.getWidth(),0,0,b.getWidth(),b.getHeight());
+        return  b;
+    }
+
+
+    public Bitmap convolution (Bitmap b, int [][] filtre, String monchoix) {
         int s = 0, t = filtre.length;
         for (int i = 0; i < t; ++i) {
             for (int j = 0; j < t; ++j) {
@@ -486,7 +508,7 @@ public void luminosite (final Bitmap b){
     }
 
 
-    public Bitmap SobelPrewitt (Bitmap b, int [][] filtre1, int [][] filtre2){
+    public Bitmap sobelPrewitt(Bitmap b, int [][] filtre1, int [][] filtre2){
         int t = filtre1.length;
         int width = b.getWidth();
         int heigth = b.getHeight();
@@ -540,7 +562,7 @@ public void luminosite (final Bitmap b){
         return retour;
     }
 
-    public Bitmap lumsat (int pourcentage, Bitmap b, String monchoix) {
+    public Bitmap luminositeEtSaturation(int pourcentage, Bitmap b, String monchoix) {
         int [] pixelTab = new int [b.getHeight()*b.getWidth()];
         Bitmap copie = b.copy(b.getConfig(),true);
         copie.getPixels(pixelTab,0,b.getWidth(),0,0,b.getWidth(),b.getHeight());
@@ -589,6 +611,30 @@ public void luminosite (final Bitmap b){
     }
 
 
+    public Bitmap negatif (Bitmap bMap) {
+        int[] Pixels = new int[bMap.getWidth() * bMap.getHeight()];
+        Bitmap copie = bMap.copy(bMap.getConfig(),true);
+        copie.getPixels(Pixels, 0, bMap.getWidth(), 0, 0, bMap.getWidth(), bMap.getHeight());
+        for (int i = 0; i < Pixels.length; ++i) {
+            int rd = Color.red(Pixels[i]);
+            int vt = Color.green(Pixels[i]);
+            int bl = Color.blue(Pixels[i]);
+
+            Pixels[i] = Color.rgb(255 - rd ,255 - vt, 255 - bl);
+        }
+        copie.setPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
+        return copie;
+    }
+
+    public void startWall(Bitmap bMap){
+        WallpaperManager wallpaperManager = WallpaperManager.getInstance(getApplicationContext());
+        try {
+            wallpaperManager.setBitmap(bMap);
+            Toast.makeText(this,"Success", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }
