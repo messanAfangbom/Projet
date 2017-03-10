@@ -12,36 +12,26 @@
         android:id="@+id/wallpaper"
         android:title="Fond d'ecran"
         app:showAsAction="never"/>
-    <item
-        android:id="@+id/camera"
-        android:title="Camera"
-        android:icon="@android:drawable/ic_menu_camera"
-        app:showAsAction="always"/>
+
     <item
         android:id="@+id/save"
         android:title="Save"
         android:icon="@android:drawable/ic_menu_save"
         app:showAsAction="always"/>
 
-
     <item
-        android:id="@+id/traitement"
-        android:title="Traitement d'image">
-        <menu>
-            <item
-                android:id="@+id/griser"
-                android:title="Griser"
-                app:showAsAction="never"/>
-            <item
-                android:id="@+id/contrasteCouleur"
-                android:title="Contraste"
-                app:showAsAction="never"/>
-            <item
-                android:id="@+id/extensiongris"
-                android:title="ExtensionNiveauGris"
-                app:showAsAction="never"/>
-        </menu>
-    </item>
+        android:id="@+id/griser"
+        android:title="Griser"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/contrasteCouleur"
+        android:title="Contraster"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/extensiongris"
+        android:title="ExtensionNiveauGris"
+        app:showAsAction="never"/>
+
 
     <item
         android:id="@+id/gallery"
@@ -59,11 +49,11 @@
 
     <item
         android:id="@+id/Teinte"
-        android:title="Mettre une teinte">
+        android:title="Teinte">
         <menu>
 
             <item
-                android:id="@+id/teinte360"
+                android:id="@+id/rotHsv"
                 android:title="Rotation_HSV"/>
             <item
                 android:id="@+id/TeinteR"
@@ -85,7 +75,7 @@
     </item>
     <item
         android:id="@+id/Filtre"
-        android:title="Mettre un filtre">
+        android:title="Filtres">
         <menu>
             <item
                 android:id="@+id/moyenne"
@@ -105,6 +95,10 @@
             <item
                 android:id="@+id/negatif"
                 android:title="Negatif"/>
+            <item
+                android:id="@+id/crayon"
+                android:title="Effet Crayon"
+                app:showAsAction="never"/>
 
         </menu>
 

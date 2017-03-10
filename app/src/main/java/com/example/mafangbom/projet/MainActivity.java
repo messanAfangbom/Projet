@@ -1,16 +1,17 @@
 package com.example.mafangbom.projet;
 
 
+
 import android.app.Activity;
 import android.app.WallpaperManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,9 +19,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import static android.graphics.Color.RGBToHSV;
 import static android.graphics.Color.blue;
@@ -30,14 +29,15 @@ import static android.graphics.Color.rgb;
 //test2
 
 public class MainActivity extends AppCompatActivity {
+    private static final int CAMERA_REQUEST = 1888;
     SeekBar sb;
     int progress ;
     private Toolbar toolbar;
     public ImageView imageToUpload;
     public  Bitmap reset;
-    public  Bitmap currentBitmap;
+    public Bitmap currentBitmap;
+    public  Bitmap modifiedBitmap;
     private static final int PICK_IMAGE = 100;
-    Uri selectedImage;
     static int [][] LAPLACIEN4 = {{0,1,0},{1,-4,1},{0,1,0}};
     static int [][] LAPLACIEN8 = {{1,1,1},{1,-8,1},{1,1,1}};
     static int [][] SOBEL1 = {{-1,0,1},{-2 ,0, 2},{-1,0,1}};
@@ -71,127 +71,132 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.griser:
-                imageToUpload.setImageBitmap(toGrayTableau(currentBitmap));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(toGrayTableau(modifiedBitmap));
                 break;
             case R.id.contrasteCouleur:
-                imageToUpload.setImageBitmap(Contraste(currentBitmap));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(Contraste(modifiedBitmap));
                 break;
             case R.id.extensiongris:
-                imageToUpload.setImageBitmap(extensionDynamiqueGris(currentBitmap));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(extensionDynamiqueGris(modifiedBitmap));
                 break;
             case R.id.TeinteB:
-                imageToUpload.setImageBitmap(garderTeinte("bleu",currentBitmap));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(garderTeinte("bleu", modifiedBitmap));
                 break;
             case R.id.TeinteJ:
-                imageToUpload.setImageBitmap(garderTeinte("jaune",currentBitmap));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(garderTeinte("jaune", modifiedBitmap));
                 break;
             case R.id.TeinteM:
-                imageToUpload.setImageBitmap(garderTeinte("magenta",currentBitmap));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(garderTeinte("magenta", modifiedBitmap));
                 break;
             case R.id.TeinteR:
-                imageToUpload.setImageBitmap(garderTeinte("rouge",currentBitmap));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(garderTeinte("rouge", modifiedBitmap));
                 break;
             case R.id.TeinteV:
-                imageToUpload.setImageBitmap(garderTeinte("vert",currentBitmap));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(garderTeinte("vert", modifiedBitmap));
                 break;
             case R.id.gallery:
-                openGallery();
+                onPickImage();
                 break;
             case R.id.luminosite:
-                luminosite(currentBitmap);
+                luminosite(modifiedBitmap);
                 break;
             case  R.id.laplacien:
-                imageToUpload.setImageBitmap(convolution(currentBitmap,LAPLACIEN8,"laplacien"));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(convolution(modifiedBitmap,LAPLACIEN8,"laplacien"));
                 break;
             case R.id.sobel:
-                imageToUpload.setImageBitmap(sobelPrewitt(currentBitmap,SOBEL1,SOBEL2));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(sobelPrewitt(modifiedBitmap,SOBEL1,SOBEL2));
                 break;
             case R.id.prewitt:
-                imageToUpload.setImageBitmap(sobelPrewitt(currentBitmap,PREWITT1,PREWITT2));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(sobelPrewitt(modifiedBitmap,PREWITT1,PREWITT2));
                 break;
             case R.id.moyenne:
-                imageToUpload.setImageBitmap(convolution(currentBitmap,MOYENNE,"moyenne"));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(convolution(modifiedBitmap,MOYENNE,"moyenne"));
                 break;
             case R.id.gaussien:
-                imageToUpload.setImageBitmap(convolution(currentBitmap,gaussien,"gauss"));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(convolution(modifiedBitmap,gaussien,"gauss"));
                 break;
             case R.id.action_reset:
-                imageToUpload.setImageBitmap(currentBitmap);
+                modifiedBitmap = currentBitmap.copy(currentBitmap.getConfig(),true);
+                imageToUpload.setImageBitmap(modifiedBitmap);
                 sb.setVisibility(View.INVISIBLE);
                 break;
-            case R.id.camera:
-                openCamera();
-                break;
             case R.id.saturation:
-                saturation(currentBitmap);
+                saturation(modifiedBitmap);
                 break;
-            case R.id.teinte360:
-                teinte360(currentBitmap);
+            case R.id.rotHsv:
+                rotationHSV(modifiedBitmap);
                 break;
             case R.id.negatif:
-                imageToUpload.setImageBitmap(negatif(currentBitmap));
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(negatif(modifiedBitmap));
                 break;
             case R.id.wallpaper:
-                startWall(currentBitmap);
+                sb.setVisibility(View.INVISIBLE);
+                startWall(modifiedBitmap);
+                break;
+            case R.id.crayon:
+                sb.setVisibility(View.INVISIBLE);
+                imageToUpload.setImageBitmap(effetCrayon(modifiedBitmap,SOBEL1,SOBEL2));
 
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void openGallery(){
-        Intent intent = new Intent();
-        intent.setType("image/");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent, PICK_IMAGE);
+
+    public void onPickImage() {
+        Intent chooseImageIntent = ImagePicker.getPickImageIntent(this);
+        startActivityForResult(chooseImageIntent, PICK_IMAGE);
     }
 
-    private void openCamera() {
-        Intent camera = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(camera, 0);
+    private void takePictureFromGallery()
+    {
+        startActivityForResult(
+                Intent.createChooser(
+                        new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), "Choose an image"), PICK_IMAGE);
     }
+
+
+
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == 0) {
-            Bitmap bit = (Bitmap) data.getExtras().get("data");
-            currentBitmap = bit.copy(bit.getConfig(),true);
-            imageToUpload.setImageBitmap(currentBitmap);
 
-        }
-        if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK && data!=null) {
-                    selectedImage = data.getData();
-                    InputStream imageStream = null;
-                    try{
-                        imageStream = getContentResolver().openInputStream(selectedImage);
-                        currentBitmap = BitmapFactory.decodeStream(imageStream);
-                        imageToUpload.setImageBitmap(currentBitmap);
 
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    finally {
-                        {
-                            if(imageStream != null){
-                                try{
-                                    imageStream.close();
-                                } catch (IOException e) {
-                                  //  e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-
+        if(resultCode != RESULT_CANCELED) {
+            if (requestCode == CAMERA_REQUEST) {
+                if (data != null) {
+                    currentBitmap = (Bitmap) data.getExtras().get("data");
+                    modifiedBitmap = currentBitmap.copy(currentBitmap.getConfig(),true);
+                    imageToUpload.setImageBitmap(modifiedBitmap);
                 }
-
+            }
+            if (requestCode == PICK_IMAGE) {
+                currentBitmap = ImagePicker.getImageFromResult(this, Activity.RESULT_OK, data);
+                modifiedBitmap = currentBitmap.copy(currentBitmap.getConfig(), true);
+                imageToUpload.setImageBitmap(modifiedBitmap);
+                // TODO use bitmap
 
             }
+        }}
+
 
     public Bitmap toGrayTableau(Bitmap bMap) {
         int[] Pixels = new int[bMap.getWidth() * bMap.getHeight()];
-        Bitmap copie = bMap.copy(bMap.getConfig(),true);
-        copie.getPixels(Pixels, 0, bMap.getWidth(), 0, 0, bMap.getWidth(), bMap.getHeight());
+        bMap.getPixels(Pixels, 0, bMap.getWidth(), 0, 0, bMap.getWidth(), bMap.getHeight());
         for (int i = 0; i < Pixels.length; ++i) {
             int rd = Color.red(Pixels[i]);
             int vt = Color.green(Pixels[i]);
@@ -199,8 +204,8 @@ public class MainActivity extends AppCompatActivity {
             rd = (int) (0.3 * rd + 0.59 * vt + 0.11 * bl);
             Pixels[i] = Color.rgb(rd, rd, rd);
         }
-        copie.setPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
-        return copie;
+        bMap.setPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
+        return bMap;
     }
 
 
@@ -208,13 +213,11 @@ public class MainActivity extends AppCompatActivity {
 
         int [] tableau = new int [bMap.getWidth()*bMap.getHeight()];
         bMap.getPixels(tableau,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
-
-        Bitmap copie = bMap.copy(bMap.getConfig(),true); // je fais une copie de ma bitmap
-        toGrayTableau(copie); // je grise la copie afin de prendre le max et le min de l'image grisée
+        toGrayTableau(bMap); // je grise la copie afin de prendre le max et le min de l'image grisée
         int [] Pixels = new int [bMap.getWidth() * bMap.getHeight()];
         int min = 255;
         int max = 0;
-        copie.getPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
+        bMap.getPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
 
         for ( int ng = 0; ng < Pixels.length;ng++) { // je recupere le max et le min des niveaux gris
             if (red(Pixels[ng]) < min) {
@@ -242,19 +245,18 @@ public class MainActivity extends AppCompatActivity {
             tableau[i] = Color.rgb(LUT[red(tableau[i])], LUT[green(tableau[i])],LUT[blue(tableau[i])]);
         }
 
-        copie.setPixels(tableau,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
-        return copie;
+        bMap.setPixels(tableau,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
+        return bMap;
     }
 
     public Bitmap extensionDynamiqueGris(Bitmap bMap){
 
-        Bitmap copie = bMap.copy(bMap.getConfig(),true);
-        toGrayTableau(copie);
+        toGrayTableau(bMap);
         int [] Pixels = new int [bMap.getWidth() * bMap.getHeight()];
         int min = 255;
         int max = 0;
 
-        copie.getPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
+        bMap.getPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
 
         for ( int ng = 0; ng < Pixels.length;ng++) { // Ceci est un debut de l'extension dynamique mais que j'ai pas termininé. toute la fonction extensionDynamiqueGris marche
             if (red(Pixels[ng]) < min) {
@@ -273,8 +275,8 @@ public class MainActivity extends AppCompatActivity {
             Pixels[i] = Color.rgb(LUT[red(Pixels[i])], LUT[red(Pixels[i])],LUT[red(Pixels[i])]);
         }
 
-        copie.setPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
-        return copie;
+        bMap.setPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
+        return bMap;
     }
 
 
@@ -339,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void teinte360 (final Bitmap b){
+    public void rotationHSV(final Bitmap b){
         sb.setVisibility(View.VISIBLE);
         progress = 0;
         sb.setProgress(progress);
@@ -347,9 +349,8 @@ public class MainActivity extends AppCompatActivity {
         sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean fromUser) {
-                Bitmap r = b.copy(Bitmap.Config.ARGB_8888, true);
-                imageToUpload.setImageBitmap(teinte(i,b));
-            }
+
+                imageToUpload.setImageBitmap(teinte(i,b));}
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
 
@@ -365,9 +366,8 @@ public class MainActivity extends AppCompatActivity {
     public Bitmap garderTeinte(String monchoix, Bitmap bMap) { // pour garder uniquement le rouge d'une image et extensionDynamiqueGris le reste
         int height = bMap.getHeight();
         int width = bMap.getWidth();
-        int[] pixelTab = new int[height * width]; // à l'aide d'un tableau
-        Bitmap copie = bMap.copy(bMap.getConfig(),true);
-        copie.getPixels(pixelTab, 0, bMap.getWidth(), 0, 0, width, height); // on prend les pixels
+        int[] pixelTab = new int[height * width];// à l'aide d'un tableau
+        bMap.getPixels(pixelTab,0,width,0,0,width,height);
         for (int i = 0; i < pixelTab.length; ++i) {
             int rD = Color.red(pixelTab[i]);
             int bD = Color.blue(pixelTab[i]);
@@ -417,8 +417,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-        copie.setPixels(pixelTab, 0, width, 0, 0, width, height); // on applique les changements à l'image
-      return copie;
+        bMap.setPixels(pixelTab, 0, width, 0, 0, width, height); // on applique les changements à l'image
+      return bMap;
     }
 
 
@@ -462,8 +462,8 @@ public class MainActivity extends AppCompatActivity {
         }
         clonage.getPixels(tableauPixel, 0, width, 0, 0, width, heigth);
         int[] copie = tableauPixel.clone(); //on fait un clone du tableau pour ne pas faire la modification et repasser la dessus
-        for (int i = t / 2; i < width - 2; ++i) {
-            for (int j = t / 2; j < heigth - 2; ++j) {
+        for (int j = t / 2; j < width - 2; ++j) {
+            for (int i = t / 2; i < heigth - 2; ++i) {
                 int sommer = 0, sommeg = 0, sommeb = 0;
                 //int PixelPrincpl = copie[j + i * width];
                 for (int k = 0; k < t; ++k) {
@@ -518,8 +518,8 @@ public class MainActivity extends AppCompatActivity {
         retour = toGrayTableau(retour);
         retour.getPixels(tableauPixel, 0, width, 0, 0, width, heigth);
         int[] copie = tableauPixel.clone(); //on fait un clone du tableau pour ne pas faire la modification et repasser la dessus
-        for (int i = t / 2; i < width - 2; ++i) {
-            for (int j = t / 2; j < heigth - 2; ++j) {
+        for (int j = t / 2; j < width - 2; ++j) {
+            for (int i = t / 2; i < heigth - 2; ++i) {
                 int gradientRX = 0;
                 int gradientGX = 0;
                 int gradientBX = 0;
@@ -614,8 +614,7 @@ public class MainActivity extends AppCompatActivity {
 
     public Bitmap negatif (Bitmap bMap) {
         int[] Pixels = new int[bMap.getWidth() * bMap.getHeight()];
-        Bitmap copie = bMap.copy(bMap.getConfig(),true);
-        copie.getPixels(Pixels, 0, bMap.getWidth(), 0, 0, bMap.getWidth(), bMap.getHeight());
+        bMap.getPixels(Pixels, 0, bMap.getWidth(), 0, 0, bMap.getWidth(), bMap.getHeight());
         for (int i = 0; i < Pixels.length; ++i) {
             int rd = Color.red(Pixels[i]);
             int vt = Color.green(Pixels[i]);
@@ -623,8 +622,8 @@ public class MainActivity extends AppCompatActivity {
 
             Pixels[i] = Color.rgb(255 - rd ,255 - vt, 255 - bl);
         }
-        copie.setPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
-        return copie;
+        bMap.setPixels(Pixels,0,bMap.getWidth(),0,0,bMap.getWidth(),bMap.getHeight());
+        return bMap;
     }
 
     public void startWall(Bitmap bMap){
@@ -638,6 +637,95 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public Bitmap effetCrayon (Bitmap b, int [][] filtre1, int [][] filtre2){
+        int t = filtre1.length;
+        int width = b.getWidth();
+        int heigth = b.getHeight();
+        int[] tableauPixel = new int[width * heigth];
+        Bitmap retour  = b.copy(b.getConfig(),true);
+        retour = toGrayTableau(retour);
+        retour.getPixels(tableauPixel, 0, width, 0, 0, width, heigth);
+        int[] copie = tableauPixel.clone();
+        for (int j = t / 2; j < width - 2; ++j) {
+            for (int i = t / 2; i < heigth - 2; ++i) {
+                int gradientRX = 0;
+                int gradientGX = 0;
+                int gradientBX = 0;
+                int gradientRY = 0;
+                int gradientGY = 0 ;
+                int gradientBY = 0;
+
+                for (int k = 0; k < t; ++k) {
+                    for (int l = 0; l < t; ++l) {
+                        int indice = ((j - t / 2) + (i - t / 2) * width) + k * width + l;
+                        int Pixel = copie[indice];
+                        gradientRX = (int) (gradientRX + red(Pixel) *(filtre1[k][l]));
+                        gradientGX = (int) (gradientGX + green(Pixel) * (filtre1[k][l]));
+                        gradientBX = (int) (gradientBX + blue(Pixel) * (filtre1[k][l]));
+
+                        gradientRY = (int) (gradientRY + red(Pixel) * (filtre2[k][l]));
+                        gradientGY = (int) (gradientGY + green(Pixel) * (filtre2[k][l]));
+                        gradientBY = (int) (gradientBY + blue(Pixel) * (filtre2[k][l]));
+
+                    }
+                    int NormeR = (int) Math.sqrt(gradientRX * gradientRX + gradientRY * gradientRY);
+                    int NormeV = (int) Math.sqrt(gradientGX * gradientGX + gradientGY * gradientGY);
+                    int NormeB = (int) Math.sqrt(gradientBX * gradientBX + gradientBY * gradientBY);
+                    if (NormeB > 255) {
+                        NormeB = 255;
+                    }
+                    if (NormeR > 255) {
+                        NormeR = 255;
+                    }
+                    if (NormeV > 255) {
+                        NormeV = 255;
+                    }
+
+                    int couleur = Color.rgb(NormeR, NormeV, NormeB);
+
+                    tableauPixel[(j - t / 2) + (i - t / 2) * width] = couleur;
+                }
+            }
+        }
+        retour.setPixels(tableauPixel, 0, width, 0, 0, width, heigth);
+        for(int i = 0 ; i < width ; ++i){
+            for(int j = 0 ; j < heigth; ++j){
+                int pixel = retour.getPixel(i,j);
+                int somme = (Color.blue(pixel) + Color.red(pixel)+Color.green(pixel));
+                if (somme > 255) {
+                    somme = 0 ;
+                }
+                else {
+                    somme = 255 ;
+                }
+                pixel = Color.rgb(somme,somme,somme);
+                retour.setPixel(i,j,pixel);
+            }
+        }
+        return retour;
+    }
+
 }
+
+
+/*
+    if(resultCode != RESULT_CANCELED) {
+        if (requestCode == CAMERA_REQUEST) {
+            if (data != null) {
+                currentBitmap = (Bitmap) data.getExtras().get("data");
+                imageToUpload.setImageBitmap(currentBitmap);
+            }
+        }
+        if (requestCode == PICK_IMAGE) {
+
+            currentBitmap = ImagePicker.getImageFromResult(this, Activity.RESULT_OK, data);
+            modifiedBitmap = currentBitmap.copy(currentBitmap.getConfig(), true);
+            imageToUpload.setImageBitmap(modifiedBitmap);
+            // TODO use bitmap
+
+        }
+    }}
+*/
+
 
 

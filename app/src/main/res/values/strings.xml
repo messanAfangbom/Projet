@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Projet</string>
+    <string name="pick_image_intent_text">Projet</string>
 </resources>
