@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     int progress ;
     private Toolbar toolbar;
     public ImageView imageToUpload;
-    public  Bitmap reset;
     public Bitmap currentBitmap;
     public  Bitmap modifiedBitmap;
     private static final int PICK_IMAGE = 100;
